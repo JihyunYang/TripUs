@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+						"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tu.admin.dao.AdminDao">
+	<resultMap type="com.tu.admin.vo.AdminVo" id="adminVo">
+		<result property="mno" column="MNO"/>
+		<result property="mid" column="MID"/>
+		<result property="mpw" column="MPW"/>
+		<result property="mname" column="MNAME"/>
+		<result property="mnick" column="MNICK"/>
+		<result property="mgender" column="MGENDER"/>
+		<result property="mhp" column="MHP"/>
+		<result property="memail" column="MEMAIL"/>
+		<result property="mbirth" column="MBIRTH"/>
+		<result property="mdeleteyn" column="MDELETEYN"/>
+		<result property="minsertdate" column="MINSERTDATE"/>
+		<result property="mupdatedate" column="MUPDATEDATE"/>
+		<result property="mdeletedate" column="MDELETEDATE"/>
+		<result property="mprofile" column="MPROFILE"/>
+		<result property="mgrade" column="MGRADE"/>
+		<result property="snsid" column="SNSID"/>
+		<result property="snsage" column="SNSAGE"/>
+		<result property="snsbirth" column="SNSBIRTH"/>
+		<result property="snsconnectdate" column="SNSCONNECTDATE"/>
+		<result property="mrecordinsertdate" column="MRECORDINSERTDATE"/>
+		<result property="mrecordupdatedate" column="MRECORDUPDATEDATE"/>
+	</resultMap>
+	<resultMap type="com.tu.admin.vo.AdHistoryBoardVo" id="adHistoryBoardVo">
+		<result property="adhistoryno" column="ADHISTORYNO"/>
+		<result property="adhistoryid" column="ADHISTORYID"/>
+		<result property="adhistorytitle" column="ADHISTORYTITLE"/>
+		<result property="adhistorycontent" column="ADHISTORYCONTENT"/>
+		<result property="adhistoryfile" column="ADHISTORYFILE"/>
+		<result property="adhistoryetc" column="ADHISTORYETC"/>
+		<result property="adhistorydeleteyn" column="ADHISTORYDELETEYN"/>
+		<result property="adhistoryinsertdate" column="ADHISTORYINSERTDATE"/>
+		<result property="adhistoryupdatedate" column="ADHISTORYUPDATEDATE"/>
+		<result property="adhistoryrecordinsertdate" column="ADHISTORYRECORDINSERTDATE"/>
+		<result property="adhistoryrecordupdatedate" column="ADHISTORYRECORDUPDATEDATE"/>
+	</resultMap>
+
+		
+	<select id="adlistMember" parameterType="com.tu.admin.vo.AdminVo" resultType="com.tu.admin.vo.AdminVo" resultMap="adminVo">
+		<!-- Mapper - adlistMember --> 
+		
+		SELECT
+		 *
+		 FROM(
+			   SELECT 	A.MNO
+					   ,A.MID
+					   ,A.MPW
+					   ,A.MNAME
+					   ,A.MNICK
+					   ,A.MGENDER
+					   ,A.MHP
+					   ,A.MEMAIL
+					   ,A.MBIRTH
+					   ,A.MDELETEYN
+					   ,A.MINSERTDATE
+					   ,A.MPROFILE
+					   ,A.MGRADE
+					   ,A.MRECORDINSERTDATE
+					   ,A.MRECORDUPDATEDATE
+					   ,CEIL(ROW_NUMBER() OVER(ORDER BY A.MNO)/5) PAGENO
+	            	   ,COUNT(A.MNO) OVER() AS TOTALCOUNT
+				FROM   TUMEM A
+				<if test="mdeleteyn != null">
+					WHERE  MDELETEYN = #{mdeleteyn}
+				</if>
+				
+				<if test="adsearchcondition != null and adsearchkeyword != null ">
+					<choose>
+						<when test="adsearchcondition == 'mid'">
+							AND MID LIKE '%'|| #{adsearchkeyword} ||'%'
+						</when>
+					
+						<when test="adsearchcondition == 'mnick'">
+							AND MNICK LIKE '%'|| #{adsearchkeyword} ||'%'
+						</when>
+		
+						<when test="adsearchcondition == 'mname'">
+							AND MNAME LIKE '%'|| #{adsearchkeyword} ||'%'
+						</when>
+						<when test="adsearchcondition == 'mhp'">
+							AND MHP LIKE '%'|| #{adsearchkeyword} ||'%'
+						</when>
+		
+						<otherwise>
+						AND(	MID LIKE '%'|| #{adsearchkeyword} ||'%' OR
+							    MNICK LIKE '%'|| #{adsearchkeyword} ||'%' OR
+							    MNAME LIKE '%'|| #{adsearchkeyword} ||'%' OR
+							    MHP LIKE '%'|| #{adsearchkeyword} ||'%' 
+						   )
+						</otherwise>
+					</choose>
+				</if>
+				
+				ORDER BY A.MNO DESC
+			)B
+			WHERE PAGENO = #{pageno}	
+	</select>
+	
+	
+	<select id="adhistoryBoardList"  parameterType="com.tu.admin.vo.AdHistoryBoardVo" resultType="com.tu.admin.vo.AdHistoryBoardVo"  resultMap="adHistoryBoardVo"> 
+		<!-- Mapper - adhistoryBoardList --> 
+		SELECT 
+		* 
+		FROM(
+			    SELECT 			
+						A.ADHISTORYNO AS ADHISTORYNO,
+						A.ADHISTORYID AS ADHISTORYID,
+						A.ADHISTORYTITLE AS ADHISTORYTITLE,
+						A.ADHISTORYCONTENT AS ADHISTORYCONTENT,
+						A.ADHISTORYFILE AS ADHISTORYFILE, 
+						A.ADHISTORYETC AS ADHISTORYETC,
+						A.ADHISTORYDELETEYN AS ADHISTORYDELETEYN,
+						TO_CHAR(A.ADHISTORYINSERTDATE, 'YYYY-MM-DD HH:MM') AS ADHISTORYINSERTDATE, 
+						TO_CHAR(A.ADHISTORYUPDATEDATE, 'YYYY-MM-DD HH:MM') AS ADHISTORYUPDATEDATE, 
+						TO_CHAR(A.ADHISTORYRECORDINSERTDATE, 'YYYY-MM-DD HH:MM') AS ADHISTORYRECORDINSERTDATE, 
+						TO_CHAR(A.ADHISTORYRECORDUPDATEDATE, 'YYYY-MM-DD HH:MM') AS ADHISTORYRECORDUPDATEDATE,
+						CEIL(ROW_NUMBER() OVER(ORDER BY A.ADHISTORYNO)/5) PAGENO, 
+	            		COUNT(ADHISTORYNO) OVER() AS TOTALCOUNT
+						
+				FROM    TUADHISTORYBOARD A
+				WHERE   ADHISTORYDELETEYN = 'Y'	
+				
+				<if test="adhistorysearchcondition != null and adhistorysearchkeyword != null">
+					<choose>
+						<when test="adhistorysearchcondition == 'adhistorytitle'">
+							AND ADHISTORYTITLE LIKE '%'|| #{adhistorysearchkeyword} ||'%'
+						</when>
+					
+						<when test="adhistorysearchcondition == 'adhistoryinsertdate'">
+							AND ADHISTORYINSERTDATE LIKE '%'|| #{adhistorysearchkeyword} ||'%'
+						</when>
+		
+						<otherwise>
+						AND(	ADHISTORYTITLE LIKE '%'|| #{adhistorysearchkeyword} ||'%' OR
+							    ADHISTORYINSERTDATE LIKE '%'|| #{adhistorysearchkeyword} ||'%'
+						   )
+						</otherwise>
+					</choose>
+				</if>
+				ORDER BY A.ADHISTORYNO DESC
+		) B
+		WHERE PAGENO = #{pageno}
+	
+	</select>
+	
+	<insert id="adhistoryBoardInsert" parameterType="com.tu.admin.vo.AdHistoryBoardVo">
+	<!-- Mapper - adhistoryBoardInsert --> 
+		INSERT INTO TUADHISTORYBOARD  (
+										ADHISTORYNO,
+										ADHISTORYID,
+										ADHISTORYTITLE,
+										ADHISTORYCONTENT,
+										ADHISTORYFILE, 
+										ADHISTORYETC,
+										ADHISTORYDELETEYN,
+										ADHISTORYINSERTDATE, 
+										ADHISTORYUPDATEDATE,
+    									ADHISTORYRECORDINSERTDATE, 
+    									ADHISTORYRECORDUPDATEDATE
+										
+									   )
+								VALUES(
+										(SELECT NVL2(MAX(ADHISTORYNO),'AD'||LPAD(REPLACE(MAX(ADHISTORYNO),'AD')+1,4,'0'),'AD0001') FROM   TUADHISTORYBOARD),
+						   			     #{adhistoryid},
+						   			     #{adhistorytitle},
+						   			     #{adhistorycontent},
+						   			     #{adhistoryfile},
+						   			     #{adhistoryetc},
+						   			     'Y',
+						   			     SYSDATE,
+						   			     SYSDATE,
+						   			     SYSDATE,
+						   			     SYSDATE
+						   			     
+										)		
+			
+	</insert> 
+	
+	<select id="adhistoryBoardDetail" resultMap="adHistoryBoardVo">
+	<!-- Mapper - adhistoryBoardDetail --> 
+		SELECT 
+				ADHISTORYNO,
+				ADHISTORYID,
+				ADHISTORYTITLE,
+				ADHISTORYCONTENT,
+				ADHISTORYFILE, 
+				ADHISTORYETC,
+				ADHISTORYDELETEYN,
+				TO_CHAR(ADHISTORYINSERTDATE, 'YYYY-MM-DD HH:MM') AS ADHISTORYINSERTDATE, 
+				TO_CHAR(ADHISTORYUPDATEDATE, 'YYYY-MM-DD HH:MM') AS ADHISTORYUPDATEDATE, 
+				TO_CHAR(ADHISTORYRECORDINSERTDATE, 'YYYY-MM-DD HH:MM') AS ADHISTORYRECORDINSERTDATE, 
+				TO_CHAR(ADHISTORYRECORDUPDATEDATE, 'YYYY-MM-DD HH:MM') AS ADHISTORYRECORDUPDATEDATE
+		FROM    TUADHISTORYBOARD	
+		WHERE   ADHISTORYDELETEYN = 'Y'  AND ADHISTORYNO = #{adhistoryno}
+	</select>
+	
+	<update id="adhistoryBoardUpdate">
+	<!-- Mapper - adhistoryBoardUpdate --> 
+		UPDATE  TUADHISTORYBOARD
+	    SET     ADHISTORYTITLE =  #{adhistorytitle},
+				ADHISTORYCONTENT =  #{adhistorycontent},
+				ADHISTORYFILE =  #{adhistoryfile},
+				ADHISTORYETC =  #{adhistoryetc},
+				ADHISTORYUPDATEDATE = SYSDATE,
+				ADHISTORYRECORDUPDATEDATE = SYSDATE
+		WHERE   ADHISTORYNO = #{adhistoryno} 
+		AND		ADHISTORYDELETEYN = 'Y'	
+						   			    
+	</update>
+	
+	<delete id="adhistoryBoardDelete">
+	<!-- Mapper - adhistoryBoardDelete --> 
+		UPDATE  TUADHISTORYBOARD
+	    SET     ADHISTORYDELETEYN = 'N',	
+				ADHISTORYUPDATEDATE = SYSDATE,
+				ADHISTORYRECORDUPDATEDATE = SYSDATE
+		WHERE   ADHISTORYNO = #{adhistoryno} 
+	
+	</delete>
+	
+	<select id="adlistMemberCount" parameterType="com.tu.admin.vo.AdminVo" resultType="com.tu.admin.vo.AdminVo" resultMap="adminVo">
+		<!-- Mapper - adlistMember --> 
+		
+		SELECT
+		 	 B.PAGENO          AS PAGENO,
+		     B.TOTALCOUNT      AS TOTALCOUNT
+		 FROM (
+			   SELECT 	A.MNO AS MNO
+					   ,A.MID AS MID
+					   ,A.MPW AS MPW
+					   ,A.MNAME AS MNAME
+					   ,A.MNICK AS MNICK
+					   ,A.MGENDER AS MGENDER
+					   ,A.MHP AS MHP
+					   ,A.MEMAIL AS MEMAIL
+					   ,A.MBIRTH AS MBIRTH
+					   ,A.MDELETEYN AS MDELETEYN
+					   ,A.MINSERTDATE AS MINSERTDATE
+					   ,A.MPROFILE AS MPROFILE
+					   ,A.MGRADE AS MGRADE
+					   ,A.MRECORDINSERTDATE AS MRECORDINSERTDATE
+					   ,A.MRECORDUPDATEDATE AS MRECORDUPDATEDATE
+					   ,CEIL(ROW_NUMBER() OVER(ORDER BY A.MNO)/5) PAGENO
+	            	   ,COUNT(A.MNO) OVER() AS TOTALCOUNT
+				FROM   TUMEM A
+				<if test="mdeleteyn != null">
+					WHERE  MDELETEYN = #{mdeleteyn}
+				</if>
+				
+				<if test="adsearchcondition != null and adsearchkeyword != null ">
+					<choose>
+						<when test="adsearchcondition == 'mid'">
+							AND MID LIKE '%'|| #{adsearchkeyword} ||'%'
+						</when>
+					
+						<when test="adsearchcondition == 'mnick'">
+							AND MNICK LIKE '%'|| #{adsearchkeyword} ||'%'
+						</when>
+		
+						<when test="adsearchcondition == 'mname'">
+							AND MNAME LIKE '%'|| #{adsearchkeyword} ||'%'
+						</when>
+						<when test="adsearchcondition == 'mhp'">
+							AND MHP LIKE '%'|| #{adsearchkeyword} ||'%'
+						</when>
+		
+						<otherwise>
+						AND(	MID LIKE '%'|| #{adsearchkeyword} ||'%' OR
+							    MNICK LIKE '%'|| #{adsearchkeyword} ||'%' OR
+							    MNAME LIKE '%'|| #{adsearchkeyword} ||'%' OR
+							    MHP LIKE '%'|| #{adsearchkeyword} ||'%' 
+						   )
+						</otherwise>
+					</choose>
+				</if>
+				
+				ORDER BY A.MNO DESC
+			)B
+			WHERE PAGENO = #{pageno}	
+	</select>
+	
+		<select id="adhistoryBoardListCount"  parameterType="com.tu.admin.vo.AdHistoryBoardVo" resultType="com.tu.admin.vo.AdHistoryBoardVo"  resultMap="adHistoryBoardVo"> 
+		<!-- Mapper - adhistoryBoardList --> 
+		SELECT 
+				  B.PAGENO          AS PAGENO,
+		      	  B.TOTALCOUNT      AS TOTALCOUNT
+		FROM(
+			    SELECT 			
+						A.ADHISTORYNO AS ADHISTORYNO,
+						A.ADHISTORYID AS ADHISTORYID,
+						A.ADHISTORYTITLE AS ADHISTORYTITLE,
+						A.ADHISTORYCONTENT AS ADHISTORYCONTENT,
+						A.ADHISTORYFILE AS ADHISTORYFILE, 
+						A.ADHISTORYETC AS ADHISTORYETC,
+						A.ADHISTORYDELETEYN AS ADHISTORYDELETEYN,
+						TO_CHAR(A.ADHISTORYINSERTDATE, 'YYYY-MM-DD HH:MM') AS ADHISTORYINSERTDATE, 
+						TO_CHAR(A.ADHISTORYUPDATEDATE, 'YYYY-MM-DD HH:MM') AS ADHISTORYUPDATEDATE, 
+						TO_CHAR(A.ADHISTORYRECORDINSERTDATE, 'YYYY-MM-DD HH:MM') AS ADHISTORYRECORDINSERTDATE, 
+						TO_CHAR(A.ADHISTORYRECORDUPDATEDATE, 'YYYY-MM-DD HH:MM') AS ADHISTORYRECORDUPDATEDATE,
+						CEIL(ROW_NUMBER() OVER(ORDER BY A.ADHISTORYNO)/5) PAGENO, 
+	            		COUNT(ADHISTORYNO) OVER() AS TOTALCOUNT
+				FROM    TUADHISTORYBOARD A
+				WHERE   ADHISTORYDELETEYN = 'Y'	
+				
+				<if test="adhistorysearchcondition != null and adhistorysearchkeyword != null">
+					<choose>
+						<when test="adhistorysearchcondition == 'adhistorytitle'">
+							AND ADHISTORYTITLE LIKE '%'|| #{adhistorysearchkeyword} ||'%'
+						</when>
+					
+						<when test="adhistorysearchcondition == 'adhistoryinsertdate'">
+							AND ADHISTORYINSERTDATE LIKE '%'|| #{adhistorysearchkeyword} ||'%'
+						</when>
+		
+						<otherwise>
+						AND(	ADHISTORYTITLE LIKE '%'|| #{adhistorysearchkeyword} ||'%' OR
+							    ADHISTORYINSERTDATE LIKE '%'|| #{adhistorysearchkeyword} ||'%'
+						   )
+						</otherwise>
+					</choose>
+				</if>
+				ORDER BY A.ADHISTORYNO DESC
+		) B
+		WHERE PAGENO = #{pageno}
+	
+	</select>
+	
+
+</mapper>						

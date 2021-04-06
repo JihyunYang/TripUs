@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tu.coboard.dao.MyCourseMapper">
+	<resultMap type="com.tu.coboard.vo.MyCourseVO" id="MyCourseVO">
+		<result property="mcno" column="MCNO"/>
+		<result property="mcid" column="MCID"/>
+		<result property="mcitem" column="MCITEM"/>
+		<result property="mctitle" column="MCTITLE"/>
+		<result property="mccontentid" column="MCCONTENTID"/>
+		<result property="mcinsertdate" column="MCINSERTDATE"/>
+		<result property="mcupdatedate" column="MCUPDATEDATE"/>
+		<result property="mcrecordinsertdate" column="MCRECORDINSERTDATE"/>
+		<result property="mcrecordupdatedate" column="MCRECORDUPDATEDATE"/>
+	</resultMap>
+	
+	
+
+	<select id="myCourseList" parameterType="com.tu.coboard.vo.MyCourseVO" resultMap="MyCourseVO" >
+		/* Mapper - myCourseList */
+			SELECT MCNO,MCITEM,MCCONTENTID,MCTITLE
+			FROM TUMYCO
+			WHERE MCID=#{mcid}
+			ORDER BY 1
+	</select>
+	
+	<insert id="insertCourse" parameterType="com.tu.coboard.vo.MyCourseVO" >
+		/* Mapper - "insertCourse" */
+		INSERT INTO TUMYCO VALUES(
+		  (SELECT NVL2(MAX(MCNO),'MC'||LPAD(REPLACE(MAX(MCNO),'MC')+1,4,'0'),'MC0001') 
+                      FROM   TUMYCO)
+,#{mcid},#{mcitem},#{mctitle},#{mccontentid},SYSDATE,NULL,NULL,NULL
+		) 
+	</insert>
+	<update id="updateCourse" parameterType="com.tu.coboard.vo.MyCourseVO">
+		UPDATE TUMYCO SET
+		mccontentid=#{mccontentid}, MCITEM=#{mcitem} WEHRE MCNO=#{mcno}
+	</update>
+</mapper>

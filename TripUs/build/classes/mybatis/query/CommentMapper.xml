@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.tu.comment.dao.CommentDAO">
+
+	<select id="toCommentList" parameterType="String" resultType="com.tu.comment.vo.CommentVO">
+		SELECT   A.COMMENTNO AS COMMENTNO
+		        ,A.CONTENTID AS CONTENTID
+		        ,A.COMMENTID AS COMMENTID
+		        ,A.COMMENTNICK AS COMMENTNICK
+		        ,A.COMMENTPROFILE AS COMMENTPROFILE
+		        ,A.COMMENTCONTENT AS COMMENTCONTENT
+		        ,TO_CHAR(A.COMMENTINSERTDATE, 'YYYY-MM-DD') AS COMMENTINSERTDATE
+		        ,TO_CHAR(A.COMMENTUPDATEDATE, 'YYYY-MM-DD') AS COMMENTUPDATEDATE
+		        ,A.COMMENTDELETEYN AS COMMENTDELETEYN
+		        ,TO_CHAR(A.COMMENTRECORDINSERTDATE, 'YYYY-MM-DD') AS COMMENTRECORDINSERTDATE
+		        ,TO_CHAR(A.COMMENTRECORDUPDATEDATE, 'YYYY-MM-DD') AS COMMENTRECORDUPDATEDATE
+		FROM     TUTOCOMM A
+		WHERE    A.CONTENTID = #{contentid}
+		AND      A.COMMENTDELETEYN = 'Y'
+		ORDER BY A.COMMENTNO DESC
+	</select>
+
+
+	<insert id="toCommentInsert" parameterType="com.tu.comment.vo.CommentVO">
+		INSERT INTO TUTOCOMM(
+								COMMENTNO
+							   ,CONTENTID
+							   ,COMMENTID
+							   ,COMMENTNICK
+							   ,COMMENTPROFILE
+							   ,COMMENTCONTENT
+							   ,COMMENTINSERTDATE
+							   ,COMMENTUPDATEDATE
+							   ,COMMENTDELETEYN
+							   ,COMMENTRECORDINSERTDATE
+							   ,COMMENTRECORDUPDATEDATE
+							)
+					VALUES(
+							(SELECT  NVL2(MAX(COMMENTNO),'CO'||LPAD(REPLACE(MAX(COMMENTNO),'CO')+1,4,'0'),'CO0001') 
+						     FROM    TUTOCOMM)
+						   ,#{contentid}
+						   ,#{commentid}
+						   ,#{commentnick}
+						   ,'WWW.PROFILE.URL'
+						   ,#{commentcontent}
+						   ,SYSDATE
+						   ,SYSDATE
+						   ,'Y'
+						   ,SYSDATE
+						   ,SYSDATE
+						  )
+	</insert>
+
+	 <update id="toCommentUpdate" parameterType="com.tu.comment.vo.CommentVO">
+		UPDATE   TUTOCOMM
+		SET      COMMENTCONTENT = #{commentcontent}
+		        ,COMMENTUPDATEDATE = SYSDATE
+		        ,COMMENTRECORDUPDATEDATE = SYSDATE
+		WHERE    COMMENTNO = #{commentno}
+		AND      COMMENTDELETEYN = 'Y'
+	</update>
+
+	<delete id="toCommentDelete" parameterType="String">
+		UPDATE  TUTOCOMM
+		SET     COMMENTUPDATEDATE = SYSDATE
+       		   ,COMMENTDELETEYN = 'N'
+               ,COMMENTRECORDUPDATEDATE = SYSDATE
+		WHERE   COMMENTNO = #{commentno}
+		AND     COMMENTDELETEYN = 'Y'
+	</delete>
+</mapper>
+

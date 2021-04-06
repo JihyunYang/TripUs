@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+                        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tu.qaboard.dao.QaBoardDAO">
+	<resultMap type="com.tu.qaboard.vo.QaBoardVO" id="qavo">
+		<result property="qano" column="QANO" />
+		<result property="qaid" column="QAID" />
+		<result property="qatitle" column="QATITLE" />
+		<result property="qacontent" column="QACONTENT" />
+		<result property="qatype" column="QATYPE" />
+		<result property="qaanswertype" column="QAANSWERTYPE" />
+		<result property="qasecretyn" column="QASECRETYN" />
+		<result property="qaimage" column="QAIMAGE"/>
+		<result property="qaref" column="QAREF" />
+		<result property="qastep" column="QASTEP" />
+		<result property="qainsertdate" column="QAINSERTDATE" />
+		<result property="qaupdatedate" column="QAUPDATEDATE" />
+		<result property="qadeleteyn" column="QADELETEYN" />
+		<result property="qarecordinsertdate" column="QARECORDINSERTDATE" />
+		<result property="qarecordupdatedate" column="QARECORDUPDATEDATE" />
+		<result property="qareplycontent" column="QAREPLYCONTENT" />
+	</resultMap>
+
+	<!--QnA Main Page (전체 게시글 목록)-->	
+	<select id="qaBoardList" parameterType="com.tu.qaboard.vo.QaBoardVO" resultMap="qavo">
+		/* Mapper - qaBoardList */
+		SELECT 
+				*
+		FROM (
+				SELECT    A.QANO AS QANO
+						 ,A.QAID AS QAID
+						 ,A.QATITLE AS QATITLE
+						 ,A.QACONTENT AS QACONTENT
+						 ,A.QATYPE AS QATYPE
+						 ,A.QAANSWERTYPE AS QAANSWERTYPE
+						 ,A.QASECRETYN AS QASECRETYN
+						 ,A.QAIMAGE AS QAIMAGE
+						 ,A.QAREF AS QAREF
+						 ,A.QASTEP AS QASTEP
+						 ,TO_CHAR(A.QAINSERTDATE, 'YYYY-MM-DD') AS QAINSERTDATE
+						 ,TO_CHAR(A.QAUPDATEDATE, 'YYYY-MM-DD') AS QAUPDATEDATE
+						 ,A.QADELETEYN AS QADELETEYN
+						 ,TO_CHAR(A.QARECORDINSERTDATE, 'YYYY-MM-DD') AS QARECORDINSERTDATE
+						 ,TO_CHAR(A.QARECORDUPDATEDATE, 'YYYY-MM-DD') AS QARECORDUPDATEDATE
+						 ,A.QAREPLYCONTENT AS QAREPLYCONTENT
+						 ,CEIL(ROW_NUMBER() OVER(ORDER BY A.QANO)/10) PAGENO
+		            	 ,COUNT(QANO) OVER() AS TOTALCOUNT
+				 FROM     TUQABOARD A
+				 WHERE    A.QADELETEYN = 'Y'
+					<if test="qasearchcondition != null">
+						<choose>
+							<when test="qasearchcondition == 'qaType'">
+								AND qaType LIKE '%'|| #{qasearchkeyword} ||'%'
+							</when>
+							
+							<when test="qasearchcondition == 'qaTitle'">
+								AND qaTitle LIKE '%'|| #{qasearchkeyword} ||'%'
+							</when>
+							
+							<when test="qasearchcondition == 'qaId'">
+								AND qaId LIKE '%'|| #{qasearchkeyword} ||'%'
+							</when>
+							
+							<otherwise>
+								AND(	qaType LIKE '%'|| #{qasearchkeyword} ||'%' OR
+								    	qaTitle LIKE '%'|| #{qasearchkeyword} ||'%' OR
+								    	qaId LIKE '%'|| #{qasearchkeyword} ||'%'
+							   		)
+							</otherwise>
+						</choose>
+					</if>
+					
+					<if test="qaid != null">
+						  AND QAID = #{qaid}
+					</if>
+					ORDER BY A.QAREF ASC, A.QASTEP ASC
+			 )B
+		WHERE PAGENO = #{pageno}
+	</select>
+
+	<!--QnA Insert Page (게시글 추가 페이지)-->
+    <insert id="qaBoardInsert" parameterType="com.tu.qaboard.vo.QaBoardVO">
+    	/* Mapper - "qaBoardInsert" */ 
+    	INSERT INTO TUQABOARD (
+									 QANO                     
+									,QAID
+									,QATITLE
+									,QACONTENT
+									,QATYPE
+									,QAANSWERTYPE
+									,QASECRETYN
+									,QAIMAGE
+									,QAREF
+									,QASTEP
+									,QAINSERTDATE
+									,QAUPDATEDATE
+									,QADELETEYN
+									,QARECORDINSERTDATE
+									,QARECORDUPDATEDATE
+									,QAREPLYCONTENT
+						   	   )
+						VALUES(
+						   			(SELECT NVL2(MAX(QANO),'QA'||LPAD(REPLACE(MAX(QANO),'QA')+1,4,'0'),'QA0001') 
+						    		 FROM   TUQABOARD)
+								    ,#{qaid}
+								   	,#{qatitle}
+								    ,#{qacontent}
+								    ,#{qatype}
+								    ,#{qaanswertype}
+								    ,#{qasecretyn}
+								    ,#{qaimage}
+								    ,#{qaref}
+								    ,#{qastep}
+								    ,SYSDATE
+								    ,SYSDATE
+								    ,'Y'
+								    ,SYSDATE
+								    ,SYSDATE
+						  			,<if test="qareplycontent != null">
+						  				#{qareplycontent}
+						  			 </if>
+						  
+						  			 <if test= "qareplycontent == null">
+						  				""
+						  			 </if>
+						  	)
+	</insert> 
+	
+	<!--QnA Detail Page(게시글 입력 확인페이지)-->
+    <select id="qaBoardDetail" parameterType="com.tu.qaboard.vo.QaBoardVO" resultMap="qavo">
+    	/* Mapper - qaBoardDetail */ 
+		SELECT   QANO
+				,QAID
+				,QATITLE
+				,QACONTENT
+				,QATYPE
+				,QAANSWERTYPE
+				,QASECRETYN
+				,QAIMAGE
+				,QAREF
+				,QASTEP
+				,TO_CHAR(QAINSERTDATE, 'YYYY-MM-DD') AS QAINSERTDATE
+				,TO_CHAR(QAUPDATEDATE, 'YYYY-MM-DD') AS QAUPDATEDATE
+				,QADELETEYN
+				,TO_CHAR(QARECORDINSERTDATE, 'YYYY-MM-DD') AS QARECORDINSERTDATE
+				,TO_CHAR(QARECORDUPDATEDATE, 'YYYY-MM-DD') AS QARECORDUPDATEDATE
+				,QAREPLYCONTENT
+		FROM     TUQABOARD
+		WHERE    QADELETEYN = 'Y'
+		AND      QANO = #{qano}
+    </select>
+    
+    <!--QnA Update Page (게시글 수정 페이지)-->
+    <update id="qaBoardUpdate" parameterType="com.tu.qaboard.vo.QaBoardVO" >
+    	/* Mapper - qaBoardUpdate */ 
+    	UPDATE   TUQABOARD
+	    SET      QAID = #{qaid}
+				,QATITLE = #{qatitle}
+				,QACONTENT = #{qacontent}
+				,QATYPE = #{qatype}
+				,QAANSWERTYPE = #{qaanswertype}
+				,QASECRETYN = #{qasecretyn}
+				,QAIMAGE = #{qaimage}
+				,QAUPDATEDATE = SYSDATE
+				,QARECORDUPDATEDATE = SYSDATE
+				,QAREPLYCONTENT = #{qareplycontent}
+		WHERE    QANO = #{qano}
+		AND      QADELETEYN = 'Y'	
+    </update>
+    
+    <!--QnA Delete Page (게시글 삭제 페이지)-->
+    <delete id="qaBoardDelete" parameterType="com.tu.qaboard.vo.QaBoardVO" >
+    	/* Mapper - qaBoardDelete */ 
+      	UPDATE    	TUQABOARD 
+	    SET     	QAUPDATEDATE = SYSDATE
+	    	       ,QADELETEYN ='N'
+	               ,QARECORDUPDATEDATE = SYSDATE
+	    WHERE   	QANO = #{qano}
+	    OR      	QAREF= #{qaref}    
+    </delete>
+
+	<!--QnA Reply Insert Page (답글 추가 페이지)-->
+	<update id="qaBoardReplyUpdate">
+		/* Mapper - qaBoardReplyUpdate */ 
+		UPDATE  	TUQABOARD 
+	    SET     	QAREPLYCONTENT = #{qareplycontent}
+	    WHERE   	QANO = #{qano}
+	    AND     	QADELETEYN = 'Y'
+	</update>
+	
+	<!--Get the value of the selected qano (선택된 qano의 값을 구한다) -->
+	<select id="qaBoardQaNoSelect" resultType="String">
+		/* Mapper - qaBoardQaNoSelect */ 
+	    (SELECT 
+	    		NVL2( MAX ( QANO ) , 'QA' || LPAD ( REPLACE ( MAX ( QANO ), 'QA' ) +1, 4, '0' ), 'QA0001' ) AS qano
+         FROM   TUQABOARD)
+	</select>
+	
+	<!--Paging (총 게시물에 검색과 페이징한것)-->
+	<select id = "qaBoardListCount" parameterType="java.util.Map" resultMap="qavo">
+		/* Mapper - qaBoardListCount */ 
+		SELECT 
+				   B.PAGENO          AS PAGENO,
+		      	   B.TOTALCOUNT      AS TOTALCOUNT
+		FROM (
+		
+				   SELECT   A.QANO AS QANO
+						   ,A.QAID AS QAID
+						   ,A.QATITLE AS QATITLE
+						   ,A.QACONTENT AS QACONTENT
+						   ,A.QATYPE AS QATYPE
+						   ,A.QAANSWERTYPE AS QAANSWERTYPE
+						   ,A.QASECRETYN AS QASECRETYN
+						   ,A.QAIMAGE AS QAIMAGE
+						   ,A.QAREF AS QAREF
+						   ,A.QASTEP AS QASTEP
+						   ,TO_CHAR(A.QAINSERTDATE, 'YYYY-MM-DD') AS QAINSERTDATE
+						   ,TO_CHAR(A.QAUPDATEDATE, 'YYYY-MM-DD') AS QAUPDATEDATE
+						   ,A.QADELETEYN AS QADELETEYN
+						   ,TO_CHAR(A.QARECORDINSERTDATE, 'YYYY-MM-DD') AS QARECORDINSERTDATE
+						   ,TO_CHAR(A.QARECORDUPDATEDATE, 'YYYY-MM-DD') AS QARECORDUPDATEDATE
+						   ,A.QAREPLYCONTENT AS QAREPLYCONTENT
+						   ,CEIL(ROW_NUMBER() OVER(ORDER BY A.QANO)/10) PAGENO
+	            		   ,COUNT(QANO) OVER() AS TOTALCOUNT
+					FROM    TUQABOARD A
+					WHERE   A.QADELETEYN = 'Y'
+						<if test="qasearchcondition != null">
+							<choose>
+								<when test="qasearchcondition == 'qaType'">
+									AND qaType LIKE '%'|| #{qasearchkeyword} ||'%'
+								</when>
+					
+								<when test="qasearchcondition == 'qaTitle'">
+									AND qaTitle LIKE '%'|| #{qasearchkeyword} ||'%'
+								</when>
+		
+								<when test="qasearchcondition == 'qaId'">
+									AND qaId LIKE '%'|| #{qasearchkeyword} ||'%'
+								</when>
+		
+								<otherwise>
+									AND(	qaType LIKE '%'|| #{qasearchkeyword} ||'%' OR
+							    			qaTitle LIKE '%'|| #{qasearchkeyword} ||'%' OR
+							    			qaId LIKE '%'|| #{qasearchkeyword} ||'%'
+						  			   )
+								</otherwise>
+							</choose>
+						</if>
+				
+						<if test="qaid != null">
+							  AND A.QAID = #{qaid}
+						</if>
+					ORDER BY A.QAREF ASC, A.QASTEP ASC
+			)B
+		WHERE PAGENO = #{pageno}
+	</select>
+</mapper>

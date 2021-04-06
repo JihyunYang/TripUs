@@ -1,0 +1,526 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+					  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+			
+		<title>Admin Chart Page</title>
+		
+		<!--favicons-->
+  		<link href="/admin/img/tripFavicons.png" rel="icon">
+
+  		<!--bootstrap core css-->
+  		<link href="/admin/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+ 
+ 		<!--external css-->
+ 		<!--for font-->
+  		<link href="/admin/lib/font-awesome/css/font-awesome.css" rel="stylesheet" />
+  
+  		<!--custom styles for this template-->
+  		<link href="/admin/css/style.css" rel="stylesheet">
+  		<link href="/admin/css/style-responsive.css" rel="stylesheet">
+	
+		<!--amcharts bar graph-->
+		<script src="https://www.amcharts.com/lib/4/core.js"></script>
+		<script src="https://www.amcharts.com/lib/4/charts.js"></script>
+		<script src="https://www.amcharts.com/lib/4/themes/frozen.js"></script>
+		<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+		<!--amcharts pie graph-->
+		<script src="https://www.amcharts.com/lib/4/themes/material.js"></script>
+		<!--amcharts changing data-->
+		<script src="https://www.amcharts.com/lib/4/plugins/wordCloud.js"></script>
+		<script src="https://www.amcharts.com/lib/4/themes/spiritedaway.js"></script>
+
+		<style type="text/css">
+			/*amcharts bar graph*/
+			#barChartDiv {			    
+				width: 100%;
+			    height: 350px;
+			    display: block;
+			    max-width: 85em;
+			    box-sizing: border-box;
+			    margin-left: 20%;
+			    position: relative;
+			}
+		
+			.barChartDivBox {
+				text-align: left; 
+				display: block; 
+				padding-top: 5%;
+				padding-left:21%;
+			}
+			
+			/*amcharts pie graph*/
+			#pieChartDivOne {
+  				width: 30%;
+  				height: 310px;
+  				display: inline;
+  				float : left;
+			    box-sizing: border-box;
+			    margin-left: 23%;
+			    position: relative;
+			    
+			}
+			
+			.pieChartDivOneBox {
+				text-align: left; 
+				display: block; 
+				padding-top: 3%;
+				padding-left:20%;
+			}
+			
+			#pieChartDivTwo {
+  				width: 30%;
+  				height: 310px;
+  				display: inline;
+			    box-sizing: border-box;
+			    margin-right: 10%;
+			    position: relative;
+			    float:right;
+			}
+			
+			.pieChartDivTwoBox {
+				float: right;
+				padding-right: 34%;
+			}
+			
+			/* amcharts changing data */
+			#changingChartDiv {
+			  	width: 100%;
+			    height: 350px;
+			    display: block;
+			    max-width: 85em;
+			    box-sizing: border-box;
+			    margin-left: 20%;
+			    margin-top: 8%;
+			    position: relative;
+			}
+		</style>
+	
+		<script>
+			am4core.ready(function() {
+				<!--amcharts bar graph-->
+				//themes begin
+				am4core.useTheme(am4themes_frozen);
+				am4core.useTheme(am4themes_animated);
+				//themes end
+
+				//create chart instance
+				var barChart = am4core.create("barChartDiv", am4charts.XYChart3D);
+				
+				// Add data
+				barChart.data = [{
+  					"Month": "Jan",
+  					"visits": 4025
+				}, {
+  					"Month": "Feb",
+  					"visits": 1882
+				}, {
+  					"Month": "Mar",
+  					"visits": 2002
+				}, {
+  					"Month": "Apr",
+  					"visits": 1322
+				}, {
+  					"Month": "May",
+  					"visits": 5656
+				}, {
+  					"Month": "Jun",
+  					"visits": 4893
+				}, {
+ 	 				"Month": "Jul",
+  					"visits": 3856
+				}, {
+  					"Month": "Aug",
+  					"visits": 3905
+				}, {
+  					"Month": "Sep",
+  					"visits": 2974
+				}, {
+  					"Month": "Oct",
+  					"visits": 2432
+				}, {
+  					"Month": "Nov",
+  					"visits": 1432
+				}, {
+  					"Month": "Dec",
+  					"visits": 2243
+				}];
+
+				//Create axes
+				let categoryAxis = barChart.xAxes.push(new am4charts.CategoryAxis());
+				categoryAxis.dataFields.category = "Month";
+				categoryAxis.renderer.labels.template.rotation = 0;
+				categoryAxis.renderer.labels.template.hideOversized = false;
+				categoryAxis.renderer.minGridDistance = 20;
+				categoryAxis.renderer.labels.template.horizontalCenter = "right";
+				categoryAxis.renderer.labels.template.verticalCenter = "middle";
+				categoryAxis.tooltip.label.rotation = 0;
+				categoryAxis.tooltip.label.horizontalCenter = "right";
+				categoryAxis.tooltip.label.verticalCenter = "middle";
+
+				let valueAxis = barChart.yAxes.push(new am4charts.ValueAxis());
+
+				//Create series
+				var barSeries = barChart.series.push(new am4charts.ColumnSeries3D());
+				barSeries.dataFields.valueY = "visits";
+				barSeries.dataFields.categoryX = "Month";
+				barSeries.name = "Visits";
+				barSeries.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+				barSeries.columns.template.fillOpacity = .8;
+
+				var columnTemplate = barSeries.columns.template;
+				columnTemplate.strokeWidth = 2;
+				columnTemplate.strokeOpacity = 1;
+				columnTemplate.stroke = am4core.color("#FFFFFF");
+
+				columnTemplate.adapter.add("fill", function(fill, target) {
+  				return barChart.colors.getIndex(target.dataItem.index);
+				})
+
+				columnTemplate.adapter.add("stroke", function(stroke, target) {
+  				return barChart.colors.getIndex(target.dataItem.index);
+				})
+
+				barChart.cursor = new am4charts.XYCursor();
+				barChart.cursor.lineX.strokeOpacity = 0;
+				barChart.cursor.lineY.strokeOpacity = 0;
+				
+				
+				<!--amcharts pie graph-1-->
+				//themes begin
+				am4core.useTheme(am4themes_material);
+				//themes end
+				
+				//create chart instance
+				var pieOneChart = am4core.create("pieChartDivOne", am4charts.PieChart3D);
+				// this creates initial fade-in
+				pieOneChart.hiddenState.properties.opacity = 0;
+				
+				pieOneChart.legend = new am4charts.Legend();
+				
+				// Add data
+				pieOneChart.data = [{
+					post: "공지사항",
+				    litres: 161
+				}, {
+					post: "여행지",
+				    litres: 150
+				}, {
+					post: "코스",
+				    litres: 140
+				}, {
+					post: "맛집",
+				    litres: 165
+				}, {
+					post: "축제",
+				    litres: 139
+				}];
+
+				var pieOneSeries = pieOneChart.series.push(new am4charts.PieSeries3D());
+				pieOneSeries.dataFields.value = "litres";
+				pieOneSeries.dataFields.category = "post";
+				
+				<!--amcharts pie graph-2-->
+				//themes begin
+				am4core.useTheme(am4themes_material);
+				//themes end
+				
+				//create chart instance
+				var pieTwoChart = am4core.create("pieChartDivTwo", am4charts.PieChart3D);
+				// this creates initial fade-in
+				pieTwoChart.hiddenState.properties.opacity = 0;
+				
+				pieTwoChart.legend = new am4charts.Legend();
+				
+				// Add data
+				pieTwoChart.data = [{
+					reply: "공지사항",
+				    litres: 85
+				}, {
+					reply: "여행지",
+				    litres: 90
+				}, {
+					reply: "코스",
+				    litres: 84
+				}, {
+					reply: "맛집",
+				    litres: 113
+				}, {
+					reply: "축제",
+				    litres: 71
+				}];
+
+				var pieTwoSeries = pieTwoChart.series.push(new am4charts.PieSeries3D());
+				pieTwoSeries.dataFields.value = "litres";
+				pieTwoSeries.dataFields.category = "reply";
+				
+				
+				<!--amcharts changing data-->
+				// Themes begin
+				am4core.useTheme(am4themes_spiritedaway);
+				am4core.useTheme(am4themes_animated);
+				// Themes end
+				
+				var changingChart = am4core.create("changingChartDiv", am4plugins_wordCloud.WordCloud);
+				var changingSeries = changingChart.series.push(new am4plugins_wordCloud.WordCloudSeries());
+				
+				changingSeries.accuracy = 4;
+				changingSeries.step = 15;
+				changingSeries.rotationThreshold = 0.7;
+				changingSeries.maxCount = 200;
+				changingSeries.minWordLength = 1;
+				changingSeries.labels.template.margin(4,4,4,4);
+				changingSeries.maxFontSize = am4core.percent(30);
+				
+				changingSeries.text = "tripUs,Tour,Notice,User,Seoul,Busan,Gyeongbokgung,ChangdeokgungPalace,Insadong,GourmetTour,HanRiver,Jamsil,Jeonju,Haeundae";
+				changingSeries.colors = new am4core.ColorSet();
+				// makes it loop
+				changingSeries.colors.passOptions = {};
+
+				//series.labelsContainer.rotation = 45;
+				changingSeries.angles = [0,-90];
+				changingSeries.fontWeight = "700"
+			    changingSeries.fontname ="korean"
+				setInterval(function () {
+					changingSeries.dataItems.getIndex(Math.round(Math.random() * (changingSeries.dataItems.length - 1))).setValue("value", Math.round(Math.random() * 10));
+				 }, 10000)
+			}); // end am4core.ready()
+		</script>
+	</head>
+
+	<body>
+		<section id="container">
+  			<!--TOP BAR CONTENT & NOTIFICATIONS-->
+   			<!--header start-->
+    		<header class="header black-bg">
+	      		<div class="sidebar-toggle-box">
+	       			<div class="fa fa-bars tooltips" data-placement="right" data-original-title="Toggle Navigation"></div>
+	      		</div>
+	      		
+	      		<!--logo start-->
+	      		<a href="/admin.jsp" class="logo"><b>trip<span>Us</span></b></a>
+	      		<!--logo end-->
+	      
+	      		<div class="nav notify-row" id="top_menu">
+	        		<!--  notification start -->
+	       			<ul class="nav top-menu">
+	        			<!--inbox dropdown start-->
+	        			<li id="header_inbox_bar" class="dropdown">
+		            		<a data-toggle="dropdown" class="dropdown-toggle" href="/admin.jsp#">
+		              			<i class="fa fa-envelope-o"></i>
+		              			<span class="badge bg-theme">3</span>
+		              		</a>
+	            
+	            			<ul class="dropdown-menu extended inbox">
+	              				<div class="notify-arrow notify-arrow-green"></div>
+			              			<li>
+			                			<p class="green">새로운 메세지 3개가 있습니다.</p>
+			              			</li>
+	              
+			              			<li>
+			                			<a href="/admin.jsp#">
+			                  				<span class="photo"><img alt="avatar" src="/admin/img/jingoo.JPG"></span>
+			                  				<span class="subject">
+			                  					<span class="from">여진구</span>
+			                  					<span class="time">Just now</span>
+			                  				</span>
+			                  				<span class="message">
+			                  					점심 몇시에 먹어?
+			                  				</span>
+			                  			</a>
+			              			</li>
+	              		
+			              			<li>
+			                			<a href="/admin.jsp#">
+			                  				<span class="photo"><img alt="avatar" src="/admin/img/iu.JPG"></span>
+			                  				<span class="subject">
+			                  					<span class="from">IU</span>
+			                 					<span class="time">40 mins.</span>
+			                  				</span>
+			                  				<span class="message">
+			                 					10시에 공지사항 수정예정!
+			                  				</span>
+			                 		 	</a>
+			              			</li>
+	              
+			              			<li>
+			               				<a href="/admin.jsp#">
+			                  				<span class="photo"><img alt="avatar" src="/admin/img/gong.JPG"></span>
+			                  				<span class="subject">
+			                  					<span class="from">공유</span>
+			                  					<span class="time">2 hrs.</span>
+			                  				</span>
+			                  				<span class="message">
+			                  					오늘안에 업무 보고 바람.
+			                  				</span>
+			                 			</a>
+			              			</li>
+			              
+			              			<li>
+			                			<a href="/admin.jsp#">See all messages</a>
+			              			</li>
+	            			</ul>
+	          			</li>
+	          			<!--inbox dropdown end-->
+	          	
+	          			<!--notification dropdown start-->
+	          			<li id="header_notification_bar" class="dropdown">
+	            			<a data-toggle="dropdown" class="dropdown-toggle" href="/admin.jsp#">
+	              				<i class="fa fa-bell-o"></i>
+	              				<span class="badge bg-warning">2</span>
+	              			</a>
+	            
+	            			<ul class="dropdown-menu extended notification">
+	              				<div class="notify-arrow notify-arrow-yellow"></div>
+	              					<li>
+	                					<p class="green">2개의 알림이 있습니다.</p>
+	              					</li>
+	              		
+	              					<li>
+	                					<a href="/admin.jsp#">
+		                  					<span class="label label-warning"><i class="fa fa-bell"></i></span>
+		                  						결제서류 보고 받는날
+		                  					<span class="small italic">30 mins.</span>
+	                  					</a>
+	              					</li>
+	              
+					              	<li>
+					                	<a href="/admin.jsp#">
+					                  		<span class="label label-success"><i class="fa fa-plus"></i></span>
+					                 			새로운 관리자가 등록완료
+					                  		<span class="small italic">3 hrs.</span>
+					                  	</a>
+					              	</li>
+	             		
+				             		<li>
+				                		<a href="/admin.jsp#">See all notifications</a>
+				              		</li>
+	            			</ul>
+	          			</li>
+	          			<!--notification dropdown end-->
+	       			</ul>
+	       			<!--notification end-->
+	      		</div>
+	     
+	      		<div class="top-menu">
+	        		<ul class="nav pull-right top-menu">
+	          			<li><a class="logout" href="/admin/html/login.html">Logout</a></li>
+	        		</ul>
+	      		</div>
+	    	</header>
+   			<!--header end-->
+   				
+   			<!--MAIN SIDEBAR MENU-->
+   			<!--sidebar start-->
+		<aside>
+      			<div id="sidebar" class="nav-collapse ">
+        			<!-- sidebar menu start-->
+       				<ul class="sidebar-menu" id="nav-accordion">
+          				<p class="centered"><a href="/admin/html/profile.html"><img src="/admin/img/jeonjihyun.JPG" class="img-circle" width="80"></a></p>
+          					<h5 class="centered">admin</h5>
+	          					<li class="mt">
+	            					<a class="active" href="admin.jsp">
+		              					<i class="fa fa-dashboard"></i>
+		              					<span>Admin page</span>
+	              					</a>
+	          					</li>
+          
+          						<li class="sub-menu">
+            						<a href="javascript:;">
+	              						<i class="fa fa-cogs"></i>
+	              						<span>공지사항 관리</span>
+              						</a>
+            						
+            						<ul class="sub">
+						            	<li><a href="/admin/adntBoardList.ad">공지사항</a></li>
+						            	<li><a href="/admin/adqaBoardList.ad">Q&A</a></li>
+						              	<li><a href="/admin/adfaBoardList.ad">FAQ</a></li>
+						            </ul>
+          						</li>
+          						
+          						<li class="sub-menu">
+           							<a href="javascript:;">
+              							<i class="fa fa-cogs"></i>
+              							<span>회원관리</span>
+              						</a>
+			            
+			            			<ul class="sub">
+				            			<form id="adListMemberForm1">
+			              					<input type="hidden" name="mdeleteyn" value="Y">
+			              				</form>
+			              				
+			              				<form id="adListMemberForm2" >
+			              					<input type="hidden" name="mdeleteyn" value="N">
+			            				</form>
+		             	 				
+		             	 				<li onclick="adListMemberButton1()"><a>회원 목록</a></li>
+		              					<li onclick="adListMemberButton2()"><a>탈퇴 회원 목록</a></li>
+			            			</ul>
+          						</li>
+
+          						<li class="sub-menu">
+            						<a href="javascript:;">
+              							<i class=" fa fa-bar-chart-o"></i>
+              							<span>통계</span>
+              						</a>
+              						
+						            <ul class="sub">
+						               <li><a href="/admin/html/adChart.html">tripUs 통계</a></li>
+						            </ul>
+         						</li>
+          	
+          						<li class="sub-menu">
+            						<a href="javascript:;">
+              							<i class="fa fa-comments-o"></i>
+              							<span>관리자 관리</span>
+              						</a>
+              						
+						            <ul class="sub">
+						            	<li><a href="/admin/adhistoryBoardList.ad">관리자 활동내역</a></li>
+						            </ul>
+         						</li>
+          
+          						<li>
+           							<a href="/admin/html/google_maps.html">
+              							<i class="fa fa-map-marker"></i>
+              							<span>Google Maps </span>
+              						</a>
+          						</li>
+        			</ul>
+       				<!-- sidebar menu end-->
+      			</div>
+    			</aside>
+    		<!--sidebar end-->
+   					
+   			<!--MAIN CONTENT-->
+   			<!--main content start-->
+   		
+   			<!--amcharts bar graph-->
+   			<div>
+  				<p class="barChartDivBox"><span><button class="btn btn-default">1 Month 이용자 통계</button></span></p>
+   				<div id="barChartDiv"></div>
+   			</div>
+   			
+   			<!--amcharts pie graph 1&2-->
+   			<div>
+   				<p class="pieChartDivOneBox">
+   					<span><button class="btn btn-default">카테고리별 게시물 수</button></span>
+   					<span class="pieChartDivTwoBox"><button class="btn btn-default">카테고리별 댓글 수</button></span>
+   				</p>
+   				<!--amcharts pie graph-1-->
+   				<div id="pieChartDivOne"></div>
+   				<!--amcharts pie graph-2-->
+   				<div id="pieChartDivTwo"></div>
+   			</div>
+   			
+   			<!--amcharts changing data-->
+   			<div>
+   				<div id="changingChartDiv"></div>
+   			</div>
+   			<!--main content end-->
+		</section>
+	</body>
+</html>

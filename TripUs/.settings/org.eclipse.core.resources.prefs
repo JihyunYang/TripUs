@@ -1,0 +1,13 @@
+eclipse.preferences.version=1
+encoding//src/com/api/CoBoPublicData.java=UTF-8
+encoding//src/com/api/CoPublicData.java=UTF-8
+encoding//src/com/api/MapPublicData.java=UTF-8
+encoding//src/com/api/resPublicData.java=UTF-8
+encoding//src/com/tu/admin/controller/AdminController.java=UTF-8
+encoding//src/com/tu/coboard/controller/CoBoardController.java=UTF-8
+encoding//src/com/tu/coboard/service/CoBoardServiceImpl.java=UTF-8
+encoding//src/com/tu/comment/controller/CommentController.java=UTF-8
+encoding//src/com/tu/comment/vo/CommentVO.java=UTF-8
+encoding//src/com/tu/fsboard/controller/FsBoardController.java=UTF-8
+encoding//src/com/tu/lp/controller/LoginController.java=UTF-8
+encoding//src/com/tu/ntboard/controller/NtBoardController.java=UTF-8
